@@ -72,10 +72,42 @@
         height: 100%;
         object-fit: contain;
     }
+
+    .form {
+        display: none;
+        position: fixed;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        z-index: 4096;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        gap: 2rem;
+    }
+
+    .form__body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form__body input {
+        padding: .5rem 1rem;
+        border-radius: .25rem;
+        border: solid 1px #CCC;
+    }
+
+    .form button {
+        padding: .5rem 1rem;
+        border-radius: .25rem;
+        border: solid 1px #CCC;
+    }
 </style>
 
-<div class="container">
-    <div class="grid">
+<div class="container" id="container">
+    <div class="grid" id="chronometer">
         <div class="grid__item">
             <div class="grid__value" id="day">00</div>
             <div class="grid__label">Dias</div>
@@ -94,48 +126,75 @@
         </div>
     </div>
 
+    <form method="GET" class="form" id="form">
+        <h1>Selecione a Data do Evento</h1>
+
+        <div class="form__body">
+            <input name="date" type="datetime-local" id="datetime" required/>
+            <input name="bg" type="url" id="background" placeholder="https://example.com.br"/>
+        </div>
+
+        <button type="submit" class="btn">Enviar</button>
+    </form>
+
     <div class="chicago-logo">
         <img src="src/img/chicago.png" alt="">
     </div>
 </div>
 
 <script>
-    (function () {
-        const event = new Date('2023-10-08 09:30:00');
-        const day = document.getElementById('day');
-        const hours = document.getElementById('hours');
-        const minutes = document.getElementById('minutes');
-        const seconds = document.getElementById('seconds');
+  (function () {
+    const CHRONOMETER = document.getElementById('chronometer');
+    const CONTAINER = document.getElementById('container');
+    const FORM = document.getElementById('form');
 
-        setInterval(() => {
-            const now = new Date();
-            let totalSeconds = Math.abs(event - now) / 1000;
-            let d = 0, h = 0, m = 0, s = 0;
+    const PARAMS = new URLSearchParams(window.location.search);
+    const DATE = PARAMS.get('date');
+    const BG = PARAMS.get('bg');
 
-            if (totalSeconds > (60 * 60 * 24)) {
-                d = Math.floor(totalSeconds / (60 * 60 * 24));
-                totalSeconds = totalSeconds - (d * (60 * 60 * 24));
-                console.log(d);
-            }
+    if (!DATE) {
+      FORM.style.display = 'flex';
+      CHRONOMETER.style.display = 'none';
+    }
 
-            if (totalSeconds > (60 * 60)) {
-                h = Math.floor(totalSeconds / (60 * 60));
-                totalSeconds = totalSeconds - (h * (60 * 60));
-            }
+    if (BG) {
+      CONTAINER.style.backgroundImage = `url(${BG})`;
+    }
 
-            if (totalSeconds > 60) {
-                m = Math.floor(totalSeconds / 60);
-                totalSeconds = totalSeconds - (m * 60);
-            }
+    const event = new Date(DATE);
+    const day = document.getElementById('day');
+    const hours = document.getElementById('hours');
+    const minutes = document.getElementById('minutes');
+    const seconds = document.getElementById('seconds');
 
-            s = Math.floor(totalSeconds);
+    setInterval(() => {
+      const now = new Date();
+      let totalSeconds = Math.abs(event - now) / 1000;
+      let d = 0, h = 0, m = 0, s = 0;
 
-            day.innerText = String(d).padStart(2, '0');
-            hours.innerText = String(h).padStart(2, '0');
-            minutes.innerText = String(m).padStart(2, '0');
-            seconds.innerText = String(s).padStart(2, '0');
-        }, 1000);
-    })();
+      if (totalSeconds > (60 * 60 * 24)) {
+        d = Math.floor(totalSeconds / (60 * 60 * 24));
+        totalSeconds = totalSeconds - (d * (60 * 60 * 24));
+      }
+
+      if (totalSeconds > (60 * 60)) {
+        h = Math.floor(totalSeconds / (60 * 60));
+        totalSeconds = totalSeconds - (h * (60 * 60));
+      }
+
+      if (totalSeconds > 60) {
+        m = Math.floor(totalSeconds / 60);
+        totalSeconds = totalSeconds - (m * 60);
+      }
+
+      s = Math.floor(totalSeconds);
+
+      day.innerText = String(d).padStart(2, '0');
+      hours.innerText = String(h).padStart(2, '0');
+      minutes.innerText = String(m).padStart(2, '0');
+      seconds.innerText = String(s).padStart(2, '0');
+    }, 1000);
+  })();
 </script>
 </body>
 </html>
